@@ -9,11 +9,16 @@ using namespace v8;
 
 void sayHello(const FunctionCallbackInfo<Value> &args) {
     Isolate *isolate = args.GetIsolate();
+
+#if NODE_MAJOR_VERSION >= 14
+    args.GetReturnValue().Set(String::NewFromUtf8(isolate, "Hello World!").ToLocalChecked());
+#else
     args.GetReturnValue().Set(String::NewFromUtf8(isolate, "Hello World!"));
+#endif
 }
 
 // exports.Hello = Hello;
-void Initialize(Handle<Object> exports) {
+void Initialize(Local<Object> exports) {
     NODE_SET_METHOD(exports, "Hello", sayHello);
 }
 
