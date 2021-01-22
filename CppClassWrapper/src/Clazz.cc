@@ -53,6 +53,11 @@ void Clazz::Init(v8::Local<v8::Object> exports) {
           constructor.Reset();
       },
       nullptr);
+#else
+    // An AtExit hook is a function that is invoked after the Node.js event loop has ended
+    // but before the JavaScript VM is terminated and Node.js shuts down.
+    // AtExit hooks are registered using the node::AtExit API.
+    node::AtExit([](void *) { printf("in node::AtExit\n"); }, nullptr);
 #endif
 }
 
@@ -78,7 +83,8 @@ void Clazz::New(const v8::FunctionCallbackInfo<v8::Value> &args) {
         v8::Local<v8::Value> argv[argc] = { args[0] };
         v8::Local<v8::Context> context = isolate->GetCurrentContext();
         v8::Local<v8::Function> cons = v8::Local<v8::Function>::New(isolate, constructor);
-        v8::Local<v8::Object> result = cons->NewInstance(context, argc, argv).ToLocalChecked();
+        v8::Local<v8::Object> result =
+          cons->NewInstance(context, argc, argv).ToLocalChecked();  // Invoked as constructor: `new MyObject(...)`
         args.GetReturnValue().Set(result);
     }
 }
